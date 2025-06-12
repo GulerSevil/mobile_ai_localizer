@@ -1,0 +1,6 @@
+transformers
+sentencepiece
+lxml
+sacremoses
+pytest
+
