@@ -1,0 +1,35 @@
+name: PR Flow
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Run setup script
+        run: |
+          sh setup.sh
+
+      - name: Run Linter
+        run: |
+          flake8 . --max-line-length=120 --exclude=venv,venv_py311
+
+      - name: Run Tests
+        run: |
+          pytest -v
+
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: '.'
+          config_file: '.yamllint.yml'
+
+      - name: Run actionlint
+        uses: raven-actions/actionlint@v2.0.1

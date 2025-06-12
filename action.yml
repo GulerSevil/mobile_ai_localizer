@@ -1,0 +1,72 @@
+name: Localize Android or iOS strings
+description: |
+  Automatically localizes Android or iOS string resources using MarianMT (or other translation backend).
+
+inputs:
+  platform:
+    description: "The platform to localize (android or ios)"
+    required: true
+    default: android
+    type: string
+    enum:
+      - android
+      - ios
+  source_file:
+    description: "Path to the source strings file"
+    required: true
+    type: string
+  source_language_code:
+    description: "Source language code (e.g. en)"
+    required: true
+    type: string
+  target_language_code_list:
+    description: "Pipe-separated list of target language codes (e.g. de|fr|tr)"
+    required: true
+    type: string
+  pr_title:
+    description: "Title for the PR"
+    required: false
+    default: "Update translations"
+    type: string
+  pr_body:
+    description: "Body for the PR"
+    required: false
+    default: "This PR updates translations based on the latest changes."
+    type: string
+
+secrets:
+  GH_TOKEN:
+    description: "GitHub token for creating PRs"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run setup script
+      run: |
+        sh setup.sh
+
+    - name: Localize strings
+      run: |
+        python main.py \
+          --platform "${{ inputs.platform }}" \
+          --source_file "${{ inputs.source_file }}" \
+          --source_language_code "${{ inputs.source_language_code }}" \
+          --target_language_code_list "${{ inputs.target_language_code_list }}"
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        commit-message: 'chore: update translations'
+        title: ${{ inputs.pr_title }}
+        body: ${{ inputs.pr_body }}
+        branch: update-translations-${{ github.run_number }}
+        base: ${{ github.ref_name }}
+        labels: |
+          translation
+          automated
+

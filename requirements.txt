@@ -3,4 +3,5 @@ sentencepiece
 lxml
 sacremoses
 pytest
+flake8
 
