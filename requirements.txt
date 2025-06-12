@@ -1,6 +1,8 @@
-transformers
-sentencepiece
-lxml
-sacremoses
-pytest
+torch>=2.0.0
+transformers>=4.30.0
+sentencepiece>=0.1.99
+sacremoses>=0.0.53
+lxml>=4.9.3
+pytest>=7.4.0
+flake8>=6.1.0
 
