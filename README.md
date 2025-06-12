@@ -1,77 +1,108 @@
-# AI Localizer
+# Mobile AI Localizer
 
 A GitHub Action for automated localization of Android and iOS string resources using AI translation.
 
 ## Features
 
-- Supports both Android (`strings.xml`) and iOS (`Localizable.strings`) string resources
+- Supports both Android and iOS string resources
 - Uses MarianMT models for high-quality translations
-- Handles multiple target languages in a single run
-- Preserves string formatting and special characters
-- Maintains the original file structure and naming conventions
+- Handles multiple target languages
+- Preserves string formatting
+- Maintains file structure
+- Creates Pull Requests with translations
 
 ## Usage
 
 ### GitHub Action
 
 ```yaml
-- name: Localize Strings
-  uses: your-username/ai_localizer@v1
-  with:
-    platform: 'android'  # or 'ios'
-    source_file: 'app/src/main/res/values/strings.xml'  # path to source strings file
-    source_language_code: 'en'  # source language code
-    target_language_code_list: 'es|fr|de'  # pipe-separated list of target languages
-    project_root: '.'  # root directory of your project
+name: Localize Strings
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  localize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Localize strings
+        uses: GulerSevil/mobile_ai_localizer@v0.0.1
+        with:
+          platform: android
+          source_file: app/src/main/res/values/strings.xml
+          source_language_code: en
+          target_language_code_list: es|fr|de
+          project_root: ${{ github.workspace }}
+          pr_title: "Update translations"
+          pr_body: "This PR updates translations for Spanish, French, and German"
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### Command Line
 
 ```bash
+# Run localization
 python main.py \
   --platform android \
   --source_file app/src/main/res/values/strings.xml \
   --source_language_code en \
-  --target_language_code_list "es|fr|de" \
+  --target_language_code_list es|fr|de \
   --project_root .
 ```
 
 ## Input Parameters
 
-| Parameter | Description | Required |
-|-----------|-------------|----------|
-| `platform` | Target platform: `android` or `ios` | Yes |
-| `source_file` | Path to the source strings file | Yes |
-| `source_language_code` | Source language code (e.g., 'en') | Yes |
-| `target_language_code_list` | Pipe-separated list of target languages (e.g., 'es\|fr\|de') | Yes |
-| `project_root` | Root directory of your project | Yes |
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| platform | Yes | android | The platform to localize (android or ios) |
+| source_file | Yes | - | Path to the source strings file |
+| source_language_code | Yes | - | Source language code (e.g. en) |
+| target_language_code_list | Yes | - | Pipe-separated list of target language codes (e.g. de\|fr\|tr) |
+| project_root | Yes | ${{ github.workspace }} | Path to the project root |
+| pr_title | No | "Update translations" | Title for the PR |
+| pr_body | No | "This PR updates translations based on the latest changes." | Body for the PR |
+| gh_token | Yes | - | GitHub token for creating PRs. Use `${{ secrets.GITHUB_TOKEN }}` for standard permissions or a custom token with appropriate permissions. |
 
 ## Output
 
-For Android:
-- Creates `values-{lang}` directories in `app/src/main/res/`
-- Generates `strings.xml` files with translated strings
+### Android
+```
+${project_root}/app/src/main/res/
+├── values/
+│   └── strings.xml
+├── values-es/
+│   └── strings.xml
+├── values-fr/
+│   └── strings.xml
+└── values-de/
+    └── strings.xml
+```
 
-For iOS:
-- Creates `{lang}.lproj` directories
-- Generates `Localizable.strings` files with translated strings
+### iOS
+```
+${project_root}/
+├── en.lproj/
+│   └── Localizable.strings
+├── es.lproj/
+│   └── Localizable.strings
+├── fr.lproj/
+│   └── Localizable.strings
+└── de.lproj/
+    └── Localizable.strings
+```
 
 ## Requirements
 
-- Python 3.8+
-- Dependencies listed in `requirements.txt`
+- Python 3.11+
 
 ## Development
 
 1. Clone the repository
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run tests:
-   ```bash
-   pytest
-   ```
+2. Run setup script: `pip install -e ".[dev]"`
+3. Run tests: `pytest`
 
 ## License
 

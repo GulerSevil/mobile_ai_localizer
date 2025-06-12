@@ -1,0 +1,43 @@
+name: PR Flow
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        working-directory: ${{ github.workspace }}/src
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        working-directory: ${{ github.workspace }}/src
+        run: python -m pytest
+
+      - name: Run Linter
+        working-directory: ${{ github.workspace }}/src
+        run: flake8 . --max-line-length=120 
+
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: '.'
+          config_file: '.yamllint.yml'
+
+      - name: Run actionlint
+        uses: raven-actions/actionlint@v2.0.1

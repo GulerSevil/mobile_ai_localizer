@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mobile_ai_localizer"
+version = "0.1.0"
+description = "A tool for localizing mobile app strings using AI translation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "torch",
+    "transformers",
+    "sentencepiece",
+    "sacremoses",
+    "lxml"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "flake8",
+    "black"
+]
+
+[tool.setuptools]
+packages = ["core", "constants"]
+package-dir = {"" = "."} 

@@ -1,20 +1,12 @@
-# Python virtual environments
-venv/
-venv_py311/
+venv_py31/
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Distribution / packaging
-dist/
-build/
 *.egg-info/
 
-# Environment variables
-.env
+.vscode/
 
-# Logs
-*.log
+.pytest_cache/
 
-# macOS system files
-.DS_Store 
+.DS_Store
