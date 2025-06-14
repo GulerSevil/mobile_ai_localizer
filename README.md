@@ -28,18 +28,16 @@ jobs:
   localize:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Localize Android strings
+      - name: Localize strings
         uses: GulerSevil/mobile_ai_localizer@v0.0.1
         with:
           platform: android
-          source_file: ${{github.workspace}}/app/src/main/res/values/strings.xml
+          source_file: app/src/main/res/values/strings.xml
           source_language_code: en
           target_language_code_list: es|fr|de
+          project_root: ${{ github.workspace }}
           pr_title: "Update translations"
           pr_body: "This PR updates translations for Spanish, French, and German"
-          project_root: ${{ github.workspace }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
@@ -54,20 +52,22 @@ python main.py \
   --platform android \
   --source_file app/src/main/res/values/strings.xml \
   --source_language_code en \
-  --target_language_code_list es|fr|de
+  --target_language_code_list es|fr|de \
+  --project_root .
 ```
 
 ## Input Parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| platform | Yes | The platform to localize (android or ios) |
-| source_file | Yes | Path to the source strings file |
-| source_language_code | Yes | Source language code (e.g. en) |
-| target_language_code_list | Yes | Pipe-separated list of target language codes (e.g. de\|fr\|tr) |
-| pr_title | No | Title for the PR (default: "Update translations") |
-| pr_body | No | Body for the PR (default: "This PR updates translations based on the latest changes.") |
-| gh_token | Yes | GitHub token for creating PRs. Use `${{ secrets.GITHUB_TOKEN }}` for standard permissions or a custom token with appropriate permissions. |
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| platform | Yes | android | The platform to localize (android or ios) |
+| source_file | Yes | - | Path to the source strings file |
+| source_language_code | Yes | - | Source language code (e.g. en) |
+| target_language_code_list | Yes | - | Pipe-separated list of target language codes (e.g. de\|fr\|tr) |
+| project_root | Yes | ${{ github.workspace }} | Path to the project root |
+| pr_title | No | "Update translations" | Title for the PR |
+| pr_body | No | "This PR updates translations based on the latest changes." | Body for the PR |
+| gh_token | Yes | - | GitHub token for creating PRs. Use `${{ secrets.GITHUB_TOKEN }}` for standard permissions or a custom token with appropriate permissions. |
 
 ## Output
 
@@ -86,7 +86,7 @@ ${project_root}/app/src/main/res/
 
 ### iOS
 ```
-${project_root}/Resources/
+${project_root}/
 ├── en.lproj/
 │   └── Localizable.strings
 ├── es.lproj/

@@ -2,28 +2,31 @@ name: PR Flow
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  lint-and-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.2.2
-
-      - name: Run setup script
+  test:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        working-directory: ${{ github.action_path }}/src
         run: |
-          sh setup.sh
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        working-directory: ${{ github.action_path }}/src
+        run: python -m pytest
 
       - name: Run Linter
-        run: |
-          flake8 . --max-line-length=120 --exclude=venv,venv_py311
-
-      - name: Run Tests
-        run: |
-          pytest -v
+        working-directory: ${{ github.action_path }}/src
+        run: flake8 . --max-line-length=120 --exclude=venv,venv_py311
 
       - name: Run yamllint
         uses: ibiqlik/action-yamllint@v3
