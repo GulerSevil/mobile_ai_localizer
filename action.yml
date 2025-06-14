@@ -49,15 +49,20 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Run setup script
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
       shell: bash
-      working-directory: ${{ github.action_path }}
+      working-directory: ${{ github.action_path }}/src
       run: |
-        sh setup.sh
+        pip install -e .
 
     - name: Localize strings
       shell: bash
-      working-directory: ${{ github.action_path }}
+      working-directory: ${{ github.action_path }}/src
       run: |
         python main.py \
           --platform "${{ inputs.platform }}" \

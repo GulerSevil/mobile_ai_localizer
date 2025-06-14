@@ -1,5 +1,4 @@
 from transformers import MarianMTModel, MarianTokenizer, AutoConfig
-import html
 from config.constants import MODEL_NAME_PATTERNS
 
 class Localizer:
@@ -42,4 +41,4 @@ class Localizer:
         return [
             {"key": entry["key"], "translated": translated_text.strip('\'"')}
             for entry, translated_text in zip(entries, translations)
-        ]
+        ] 

@@ -2,8 +2,6 @@ import pytest
 import os
 import tempfile
 from unittest.mock import patch, MagicMock, call
-import sys
-from io import StringIO
 from main import main
 
 @pytest.fixture
@@ -33,12 +31,14 @@ def mock_translator():
             {"key": "welcome", "translated": "Bienvenido"}, 
             {"key": "hello", "translated": "Hola"}
         ]
-        yield instance
+        yield mock
 
 @pytest.fixture
 def mock_parser():
-    with patch('main.parse_strings') as mock:
-        mock.return_value = [
+    with patch('main.StringParser') as mock:
+        instance = MagicMock()
+        mock.return_value = instance
+        instance.parse.return_value = [
             {"key": "welcome", "text": "Welcome"},
             {"key": "hello", "text": "Hello"}
         ]
@@ -46,7 +46,9 @@ def mock_parser():
 
 @pytest.fixture
 def mock_writer():
-    with patch('main.write_translations') as mock:
+    with patch('main.StringWriter') as mock:
+        instance = MagicMock()
+        mock.return_value = instance
         yield mock
 
 def test_main_success_with_one_target_language(test_dir, mock_parser, mock_translator, mock_writer):
@@ -55,12 +57,18 @@ def test_main_success_with_one_target_language(test_dir, mock_parser, mock_trans
                            '--source_language_code', 'en', '--target_language_code_list', 'es',
                            '--project_root', test_dir]):
         main()
-        mock_parser.assert_called_once_with(source_file, 'android')
-        mock_translator.translate_batch.assert_called_once_with(
-            mock_parser.return_value, 'es'
+        
+        mock_parser.assert_called_once_with('android')
+        mock_parser.return_value.parse.assert_called_once_with(source_file)
+        
+        mock_translator.assert_called_once_with('en')
+        mock_translator.return_value.translate_batch.assert_called_once_with(
+            mock_parser.return_value.parse.return_value, 'es'
         )
-        mock_writer.assert_called_once_with(
-            mock_translator.translate_batch.return_value, 'android', 'es', test_dir
+        
+        mock_writer.assert_called_once_with('android')
+        mock_writer.return_value.write.assert_called_once_with(
+            mock_translator.return_value.translate_batch.return_value, 'es', test_dir
         )
     
 def test_main_success_with_multiple_target_languages(test_dir, mock_parser, mock_translator, mock_writer):
@@ -69,11 +77,22 @@ def test_main_success_with_multiple_target_languages(test_dir, mock_parser, mock
                            '--source_language_code', 'en', '--target_language_code_list', 'es|fr',
                            '--project_root', test_dir]):
         main()
-        mock_translator.translate_batch.assert_has_calls([
-            call(mock_parser.return_value, 'es'),
-            call(mock_parser.return_value, 'fr')
+        
+        mock_parser.assert_called_once_with('android')
+        mock_parser.return_value.parse.assert_called_once_with(source_file)
+        
+        mock_translator.assert_called_once_with('en')
+        mock_translator.return_value.translate_batch.assert_has_calls([
+            call(mock_parser.return_value.parse.return_value, 'es'),
+            call(mock_parser.return_value.parse.return_value, 'fr')
         ])
-        assert mock_writer.call_count == 2
+        
+        mock_writer.assert_called_once_with('android')
+        assert mock_writer.return_value.write.call_count == 2
+        mock_writer.return_value.write.assert_has_calls([
+            call(mock_translator.return_value.translate_batch.return_value, 'es', test_dir),
+            call(mock_translator.return_value.translate_batch.return_value, 'fr', test_dir)
+        ])
 
 def test_main_invalid_platform(test_dir):
     source_file = os.path.join(test_dir, "strings.xml")
