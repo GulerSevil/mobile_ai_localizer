@@ -77,33 +77,39 @@ class StringParser:
 
     def _parse_ios_strings(self, file_path: str) -> List[Dict[str, str]]:
         try:
-            print(f"Attempting to read iOS strings file from: {os.path.abspath(file_path)}")
-            
+            print(
+                f"Attempting to read iOS strings file from: {os.path.abspath(file_path)}"
+            )
+
             if not os.path.exists(file_path):
                 print(f"File not found at: {file_path}")
                 raise FileNotFoundError(f"iOS strings file not found at: {file_path}")
-            
+
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
                 if not content.strip():
                     print("Warning: File content is empty or contains only whitespace")
                     return []
-                
+
                 # Remove comments
-                content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)  # Remove /* */ comments
-                content = re.sub(r'//.*?$', '', content, flags=re.MULTILINE)  # Remove // comments
-                
+                content = re.sub(
+                    r"/\*.*?\*/", "", content, flags=re.DOTALL
+                )  # Remove /* */ comments
+                content = re.sub(
+                    r"//.*?$", "", content, flags=re.MULTILINE
+                )  # Remove // comments
+
                 pattern = r'"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)";'
                 matches = re.findall(pattern, content)
-                
+
                 results = []
                 for key, value in matches:
-                    key = key.encode().decode('unicode_escape')
-                    value = value.encode().decode('unicode_escape')
+                    key = key.encode().decode("unicode_escape")
+                    value = value.encode().decode("unicode_escape")
                     results.append({"key": key, "translated": value})
-                
+
                 return results
-                
+
         except Exception as e:
             print(f"Error details: {str(e)}")
             raise ValueError(f"Error parsing iOS strings file: {str(e)}")

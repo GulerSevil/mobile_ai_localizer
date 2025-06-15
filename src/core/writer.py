@@ -49,8 +49,4 @@ class StringWriter:
                 f.write(f'"{entry["key"]}" = "{value}";\n')
 
     def escape_ios_string(self, s: str) -> str:
-        return (
-            s.replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-        )
+        return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
